@@ -12,12 +12,14 @@ public class ApprovalListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
 
-        if(event.getReaction().getTextChannel().getId().contains(Config.getValue("submissionchannel")) && event.getReaction().getReactionEmote().toString().contains("✅") && event.getMember().getUser().getId().contains("265849018662387712")) {
+        try{
+
+        if(event.getReaction().getTextChannel().getId().contains(Config.getValue("submissionchannel")) && event.getReaction().getReactionEmote().toString().contains("✅") && event.getGuild().getMemberById(event.getUser().getId()).getRoles().contains(event.getGuild().getRoleById(Config.getValue("allowed")))) {
             event.getJDA().getUserById(Config.getValue("auth" + Config.getValue(event.getMessageId()))).openPrivateChannel().queue(channel -> {
                 channel.sendMessage(
 
                         new EmbedBuilder()
-                                .setTitle("Congratulations, you submission has been approved!")
+                                .setTitle("Congratulations, your submission has been approved!")
                                 .setColor(Color.GREEN)
                                 .addField("Submission", Config.getValue(Config.getValue(event.getMessageId())), true)
                                 .addField("ID", Config.getValue(event.getMessageId()), true)
@@ -35,11 +37,15 @@ public class ApprovalListener extends ListenerAdapter {
                             .addField("Status", "Approved", true)
                     .build()
 
-            ).queue();
+            ).complete();
 
             event.getGuild().getTextChannelById(Config.getValue("submissionchannel")).getMessageById(event.getMessageId()).queue(message -> message.delete().queue());
 
-        }else if (event.getReaction().getTextChannel().getId().contains(Config.getValue("submissionchannel")) && event.getReaction().getReactionEmote().toString().contains("❌") && event.getMember().getUser().getId().contains("265849018662387712")) {
+            Config.deleteKey("auth" + Config.getValue(event.getMessageId()));
+            Config.deleteKey(Config.getValue(event.getMessageId()));
+            Config.deleteKey(event.getMessageId());
+
+        }else if (event.getReaction().getTextChannel().getId().contains(Config.getValue("submissionchannel")) && event.getReaction().getReactionEmote().toString().contains("❌") && event.getGuild().getMemberById(event.getUser().getId()).getRoles().contains(event.getGuild().getRoleById(Config.getValue("allowed")))) {
             event.getJDA().getUserById(Config.getValue("auth" + Config.getValue(event.getMessageId()))).openPrivateChannel().queue(channel -> {
                 channel.sendMessage(
 
@@ -62,15 +68,25 @@ public class ApprovalListener extends ListenerAdapter {
                             .addField("Status", "Rejected", true)
                             .build()
 
-            ).queue();
+            ).complete();
 
             event.getGuild().getTextChannelById(Config.getValue("submissionchannel")).getMessageById(event.getMessageId()).queue(message -> message.delete().queue());
 
+            Config.deleteKey("auth" + Config.getValue(event.getMessageId()));
+            Config.deleteKey(Config.getValue(event.getMessageId()));
+            Config.deleteKey(event.getMessageId());
+            Config.init();
+
+        }else {
+            //EMPTY | SHOULD PREVENT ERRORS THO
         }
 
-        Config.deleteKey(Config.getValue("auth" + Config.getValue(event.getMessageId())));
-        Config.deleteKey(Config.getValue(Config.getValue(event.getMessageId())));
-        Config.init();
+
+
+
+    }catch (Exception e) {
+        Config.addKey("crashlogAL", e.getMessage());
+    }
 
     }
 }

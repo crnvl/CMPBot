@@ -21,10 +21,13 @@ public class Main {
 
         Config.init();
         if(!Config.propExist("submissionchannel")) {
-            Config.addKey("submissionchannel", "704161800744206398");
+            Config.addKey("submissionchannel", "PASTE CHANNEL ID HERE");
         }
         if(!Config.propExist("sublog")) {
-            Config.addKey("sublog", "704176921344475137");
+            Config.addKey("sublog", "PASTE CHANNEL ID HERE");
+        }
+        if(!Config.propExist("allowed")) {
+            Config.addKey("allowed", "PASTE ROLE ID HERE");
         }
 
         builder = new JDABuilder(AccountType.BOT);
